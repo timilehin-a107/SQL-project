@@ -1,0 +1,98 @@
+--- View all information in the data
+
+SELECT * FROM bank_customers;
+
+----Number of customers 
+
+SELECT COUNT(*) FROM bank_customers;
+
+---- % of customers with credit card 
+
+SELECT has_credit_card, COUNT(*) AS numer_of_credit_card FROM bank_customers
+GROUP BY has_credit_card;
+
+---Number of exits 
+
+SELECT exited, COUNT(*) AS number_of_exits FROM 
+bank_customers
+GROUP by exited;
+
+--- Average age of customer 
+
+SELECT AVG(age) AS avg_age_of_customers FROM bank_customers;
+
+---- Average metrics when looking at customer churn outcome 
+
+SELECT exited,
+       AVG(creditscore) AS avg_creditscore,
+       AVG(age) AS avg_age,
+       AVG(balance) AS avg_balance,
+       AVG(numofproducts) AS avg_products,
+       AVG(estimated_salary) AS avg_salary,
+       AVG(CASE WHEN has_credit_card THEN 1 ELSE 0 END) AS percent_with_card,
+       AVG(CASE WHEN is_active_member THEN 1 ELSE 0 END) AS percent_active
+FROM bank_customers
+GROUP BY exited;
+
+---- Churn rate by gender ---
+
+SELECT gender,
+       ROUND(AVG(CASE WHEN exited THEN 1 ELSE 0 END) * 100, 2) AS churn_rate_percent
+FROM bank_customers
+GROUP BY gender;
+
+----- Churn rate by tenure ---
+
+SELECT tenure,
+       COUNT(*) AS total_customers,
+       SUM(CASE WHEN exited THEN 1 ELSE 0 END) AS churned,
+       ROUND(AVG(CASE WHEN exited THEN 1 ELSE 0 END) * 100, 2) AS churn_rate_percent
+FROM bank_customers
+GROUP BY tenure
+ORDER BY tenure;
+
+---- Age distribution of customers 
+
+SELECT
+  CASE
+    WHEN age < 30 THEN 'Under 30'
+    WHEN age BETWEEN 30 AND 50 THEN '30-50'
+    ELSE 'Over 50' END AS age_group,
+  COUNT(*) AS total_customers
+FROM bank_customers
+GROUP BY age_group;
+
+SELECT geography, COUNT(*) FROM bank_customers
+GROUP BY geography;
+
+---- Gender distribution of customers 
+
+SELECT gender, COUNT(*) AS total_customers
+FROM bank_customers
+GROUP BY gender;
+
+---- Churn rate by geography(country)
+
+SELECT geography,
+       ROUND(AVG(balance)) AS avg_balance,
+       ROUND(AVG(creditscore)) AS avg_creditscore,
+       ROUND(AVG(age)) AS avg_age,
+       ROUND(AVG(CASE WHEN exited THEN 1 ELSE 0 END) * 100, 2) AS churn_rate
+FROM bank_customers
+GROUP BY geography;
+
+---- Segment by credit score and age group 
+
+SELECT
+  CASE WHEN creditscore >= 700 THEN 'High Credit'
+       WHEN creditscore BETWEEN 600 AND 699 THEN 'Medium Credit'
+       ELSE 'Low Credit' END AS credit_segment,
+  CASE
+    WHEN age < 30 THEN 'Young (Age 30 and below)'
+    WHEN age BETWEEN 30 AND 50 THEN 'Mid-Age (Age 30-50)'
+    ELSE 'Senior (Age 50+)' END AS age_group,
+  COUNT(*) AS customers,
+  ROUND(AVG(CASE WHEN exited THEN 1 ELSE 0 END) * 100, 2) AS churn_rate
+FROM bank_customers
+GROUP BY credit_segment, age_group
+ORDER BY credit_segment, age_group;
