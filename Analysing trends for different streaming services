@@ -1,0 +1,110 @@
+I wanted to find some trends of different streaming services across various countries. 
+# My first step was to download data online and save it as a CSV. I found a dataset that provided insight into music streaming trends from 2018 to 2024 across multiple platforms, including Spotify, Apple Music, and YouTube. It includes listener demographics, streaming habits, genre preferences, and engagement metrics.
+# I made sure the date in CSV was clean and there were no duplicates and missing values in the data. I used a basic Excel filter to ensure the quality of the data was clean before looking to upload it into PG Admin.
+# I then defined the structure of my tables and created the table in PG Admin, and then after that, I imported the CSV into. 
+
+Created a table first in PG Admin using the syntax below then followed on by uploading the CSV file after making the table 
+
+CREATE TABLE Streaming_Trends(
+USER_ID TEXT, 
+Age INTEGER, 
+Country TEXT, 
+Streaming_Platform VARCHAR(50) NOT NULL,
+Top_Genre VARCHAR(50) NOT NULL,
+Minutes_Streamed_Per_Day INTEGER,
+Number_of_Songs_Liked INTEGER,
+Most_PLayed_Artist VARCHAR NOT NULL,
+Subscription_Type Text,
+Listening_Time Text, 
+Discover_Weekly_Engagement NUMERIC(5,2),
+Repeat_Song_Rate NUMERIC(5,2)
+);
+
+1.	Total users count.
+SELECT COUNT(*) FROM streaming_trends
+2.	Number of users by country.
+SELECT country, COUNT(*) FROM streaming_trends
+GROUP BY country
+ORDER BY COUNT(*) DESC;
+3.	Most common streaming platform.
+SELECT streaming_platform, COUNT(*) FROM streaming_trends
+GROUP BY streaming_platform 	
+ORDER BY COUNT(*) DESC;
+4.	Get average age of users.
+SELECT AVG(age) FROM streaming_trends;
+5.	List distinct genres and how many users prefer each (GROUP BY Top Genre).
+SELECT top_genre, COUNT(*) FROM streaming_trends
+GROUP BY top_genre
+ORDER BY COUNT(*) DESC;
+6.Average Minutes Streamed Per Day by subscription type?
+SELECT subscription_type, AVG(minutes_streamed_per_day) FROM streaming_trends
+GROUP BY subscription_type;
+7.	Identify the top 5 countries with the highest average Repeat Song Rate (%).
+SELECT country, AVG(repeat_song_rate) FROM streaming_trends
+GROUP BY country
+ORDER BY AVG(repeat_song_rate) DESC;
+8.	Compare Morning, Afternoon vs Night listeners by count.
+SELECT listening_time, COUNT (*) FROM streaming_trends
+GROUP BY listening_time
+ORDER BY listening_time DESC;
+9.	Which Top Genre has the highest Discover Weekly Engagement (%) on average?
+SELECT top_genre, AVG(discover_weekly_engagement) AS genere_with_highest_eng FROM streaming_trends
+GROUP BY top_genre
+ORDER BY AVG(discover_weekly_engagement) DESC, 
+LIMIT 1;
+10.	Find the average number of liked songs per age group (use age buckets: 10–19, 20–29, etc.).
+SELECT 
+CASE
+    WHEN age BETWEEN 10 AND 19 THEN '10-19'
+    WHEN age BETWEEN 20 AND 29 THEN '20-29'
+    WHEN age BETWEEN 30 AND 39 THEN '30-39'
+    WHEN age BETWEEN 40 AND 49 THEN '40-49'
+    WHEN age >= 50 THEN '50+'
+    ELSE 'Unknown'
+END AS age_group,	
+ROUND(AVG(number_of_songs_liked),1) AS avg_numb_of_liked_songs FROM streaming_trends
+GROUP BY age
+ORDER BY age;
+11.	Determine the top 3 most played artists for users who stream more than 120 minutes/day.
+SELECT most_played_artist, COUNT(*) AS artist_user_count FROM streaming_trends
+WHERE minutes_streamed_per_day > 120
+GROUP BY most_played_artist
+ORDER BY COUNT(*) DESC
+LIMIT 3;
+12.	Find which subscription type leads to the highest repeat song rate.
+SELECT streaming_platform, COUNT(repeat_song_rate) AS streamingplatform_w_repeatsong FROM streaming_trends
+GROUP BY streaming_platform
+ORDER BY COUNT(repeat_song_rate) DESC;
+13.	Rank platforms by average Discover Weekly Engagement (%) for users under 25.
+SELECT streaming_platform, AVG(discover_weekly_engagement) FROM streaming_trends
+ WHERE age < 25
+ GROUP BY streaming_platform
+ ORDER BY AVG(discover_weekly_engagement) DESC;
+14. Retention Model: Flag "loyal" users as those with >75% Repeat Song Rate AND >30 Songs Liked.
+SELECT
+CASE
+WHEN repeat_song_rate > 75 
+AND number_of_songs_liked > 30  THEN 'loyal'
+ELSE 'standard'
+END AS user_type,
+COUNT(*)
+FROM streaming_trends
+GROUP BY user_type;
+15.	Geo Trend: What genres are most popular per country?
+SELECT country, COUNT(top_genre) FROM streaming_trends
+GROUP BY country
+ORDER BY COUNT(top_genre);
+16. Platform Power: Which platform has the most highly engaged premium users?
+(SELECT streaming_platform, COUNT(subscription_type) FROM streaming_trends
+WHERE subscription_type= 'Premium'
+AND discover_weekly_engagement > 75
+GROUP BY streaming_platform)
+17. Discover Weekly Value: Does Discover Weekly engagement correlate with repeat behavior?
+SELECT streaming_platform, COUNT(subscription_type) AS highly_engaged_premium_users
+FROM streaming_trends
+WHERE subscription_type= 'Premium'
+AND discover_weekly_engagement > 75
+GROUP BY streaming_platform
+ORDER BY COUNT(subscription_type) DESC
+
+
