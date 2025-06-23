@@ -1,4 +1,32 @@
---- View all information in the data
+--- Process of Importing a CSV File into a Table Using pgAdmin:
+
+Table Creation:
+I first created a table in pgAdmin for my dataset using SQL syntax. This defined the structure of the table, including columns and data types.
+
+CREATE TABLE bank_customers (
+    customerid BIGINT PRIMARY KEY,
+    surname VARCHAR(100),
+    creditscore INT,
+    geography VARCHAR(50),
+    gender VARCHAR(10),
+    age INT,
+    tenure INT,
+    balance NUMERIC(15,2),
+    numofproducts INT,
+    has_credit_card BOOLEAN,
+    is_active_member BOOLEAN,
+    estimated_salary NUMERIC(15,2),
+    exited BOOLEAN
+);
+
+CSV Import:
+After creating the table, I navigated to the appropriate schema and selected the table.
+Then, using pgAdmin’s built-in import feature, I uploaded the CSV file directly into the table. 
+This allowed me to populate the table with data from the CSV while maintaining the defined structure.
+
+--- Verifying Data Import:
+
+To ensure all the relevant information from the CSV was successfully imported into the table, I used a basic SQL query as shown belo:
 
 SELECT * FROM bank_customers;
 
