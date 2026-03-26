@@ -1,0 +1,2 @@
+This project involved analysing large publicly available datasets using SQL to identify key trends. The insights generated can support businesses in making data-driven decisions related to customer retention, churn behaviour, and product engagement.
+In this project, I analysed key factors influencing customer churn, including demographics (such as age and geography), customer activity levels, and account-related features.
